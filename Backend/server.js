@@ -13,7 +13,9 @@ app.use(cors());
 app.use("/api",chatRoutes)
 
 
-
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
