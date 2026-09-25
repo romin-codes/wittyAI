@@ -44,11 +44,7 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     console.log("Failed to connect with DB", err);
-    res.status(500).json({
-      error: "Database connection failed",
-      // TEMPORARY: expose the real reason for debugging the deployment.
-      detail: err?.message,
-    });
+    res.status(500).json({ error: "Database connection failed" });
   }
 });
 
