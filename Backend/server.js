@@ -2,70 +2,56 @@ import express from "express";
 import "dotenv/config";
 import cors from "cors";
 import mongoose from "mongoose";
-import chatRoutes from "./routes/chat.js"
+import chatRoutes from "./routes/chat.js";
 
 const app = express();
-const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(cors());
 
-app.use("/api",chatRoutes)
+// Cache the Mongo connection across serverless invocations so we don't
+// open a new connection on every request (important on Vercel).
+let cached = global._mongoose;
+if (!cached) {
+  cached = global._mongoose = { conn: null, promise: null };
+}
 
-
- 
 const connectDB = async () => {
+  if (cached.conn) return cached.conn;
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(process.env.MONGODB_URI).then((m) => {
+      console.log("Connected With DB!");
+      return m;
+    });
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
+};
+
+// Ensure the DB is connected before handling any request.
+app.use(async (req, res, next) => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log("Connected With DB!");
+    await connectDB();
+    next();
   } catch (err) {
     console.log("Failed to connect with DB", err);
+    res.status(500).json({ error: "Database connection failed" });
   }
-};
-app.listen(PORT, () => {
-  console.log(`Server is running on PORT:${PORT}`);
-  
 });
-connectDB();
 
-// app.post("/test", async (req, res) => {
-//   if (!req.body?.message) {
-//     return res.status(400).json({ error: "message is required" });
-//   }
+app.get("/", (req, res) => {
+  res.send("WittyAI backend is running");
+});
 
-//   const options = {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-//     },
-//     body: JSON.stringify({
-//       model: "gpt-4o-mini",
-//       messages: [
-//         {
-//           role: "user",
-//           content: req.body.message,
-//         },
-//       ],
-//     }),
-//   };
+app.use("/api", chatRoutes);
 
-//   try {
-//     const response = await fetch(
-//       "https://api.openai.com/v1/chat/completions",
-//       options,
-//     );
+// Only start a persistent server when running locally. On Vercel the app is
+// used as a serverless handler (Vercel sets process.env.VERCEL).
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 8080;
+  app.listen(PORT, () => {
+    console.log(`Server is running on PORT:${PORT}`);
+  });
+}
 
-//     if (!response.ok) {
-//       const error = await response.json();
-//       return res.status(response.status).json({ error: error.message });
-//     }
-
-//     const data = await response.json();
-//     console.log(data.choices[0].message);
-//     res.send(data.choices[0].message);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
+export default app;
