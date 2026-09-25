@@ -19,12 +19,21 @@ if (!cached) {
 const connectDB = async () => {
   if (cached.conn) return cached.conn;
   if (!cached.promise) {
-    cached.promise = mongoose.connect(process.env.MONGODB_URI).then((m) => {
-      console.log("Connected With DB!");
-      return m;
-    });
+    cached.promise = mongoose
+      .connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 8000 })
+      .then((m) => {
+        console.log("Connected With DB!");
+        return m;
+      });
   }
-  cached.conn = await cached.promise;
+  try {
+    cached.conn = await cached.promise;
+  } catch (err) {
+    // Reset the cached promise so the next request can retry instead of
+    // reusing a permanently-rejected promise.
+    cached.promise = null;
+    throw err;
+  }
   return cached.conn;
 };
 
@@ -35,7 +44,11 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     console.log("Failed to connect with DB", err);
-    res.status(500).json({ error: "Database connection failed" });
+    res.status(500).json({
+      error: "Database connection failed",
+      // TEMPORARY: expose the real reason for debugging the deployment.
+      detail: err?.message,
+    });
   }
 });
 
