@@ -3,6 +3,7 @@ import "./Sidebar.css";
 import { MyContext } from "./MyContext.jsx";
 import { v1 as uuidv1 } from "uuid";
 import { API_BASE_URL } from "./config.js";
+import wittyaiIcon from "./assets/wittyai_icon.jpg";
 
 function Sidebar() {
   const {
@@ -86,7 +87,7 @@ function Sidebar() {
   return (
     <section className="sidebar">
       <button onClick={createNewChat}>
-        <img src="src/assets/wittyai_icon.jpg" alt="gpt-logo" className="logo" />
+        <img src={wittyaiIcon} alt="gpt-logo" className="logo" />
         <span>
           <i className="fa-solid fa-pen-to-square"></i>
         </span>
