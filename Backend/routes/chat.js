@@ -1,5 +1,11 @@
- import express from "express";
+import express from "express";
 import Thread from "../models/Thread.js";
+import getAIServiceResponse, {
+  clearDocuments,
+  ingestFileStream,
+  ingestUrl,
+  listDocuments,
+} from "../utils/aiService.js";
 import getOpenAIAPIResponse from "../utils/openai.js";
 
 const router = express.Router();
@@ -68,6 +74,10 @@ router.post("/chat", async (req, res) => {
   }
   try {
     let thread = await Thread.findOne({ threadId });
+    const priorHistory = thread
+      ? thread.messages.map(({ role, content }) => ({ role, content }))
+      : [];
+
     if (!thread) {
       thread = new Thread({
         threadId,
@@ -78,14 +88,77 @@ router.post("/chat", async (req, res) => {
       thread.messages.push({ role: "user", content: message });
     }
 
-    const assistantReply = await getOpenAIAPIResponse(message);
-    thread.messages.push({ role: "assistant", content: assistantReply });
+    const aiResult = await getAIServiceResponse({
+      threadId,
+      message,
+      history: priorHistory,
+    });
+    const assistantReply = aiResult
+      ? aiResult.reply
+      : await getOpenAIAPIResponse(message);
+    const usage = aiResult?.usage ?? null;
+    const sources = aiResult?.sources ?? [];
+
+    thread.messages.push({
+      role: "assistant",
+      content: assistantReply,
+      sources,
+    });
     thread.updatedAt = new Date();
     await thread.save();
-    res.json({ reply: assistantReply });
+    res.json(
+      usage
+        ? { reply: assistantReply, usage, sources }
+        : { reply: assistantReply, sources },
+    );
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Something went wrong!" });
+  }
+});
+
+// RAG document endpoints (proxied to Python ai-service)
+router.get("/documents", async (req, res) => {
+  try {
+    const data = await listDocuments();
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(error.status || 502).json({ error: error.message });
+  }
+});
+
+router.delete("/documents", async (req, res) => {
+  try {
+    const data = await clearDocuments();
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(error.status || 502).json({ error: error.message });
+  }
+});
+
+router.post("/documents/url", async (req, res) => {
+  const { url } = req.body || {};
+  if (!url) {
+    return res.status(400).json({ error: "Missing required field: url" });
+  }
+  try {
+    const data = await ingestUrl(url);
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(error.status || 502).json({ error: error.message });
+  }
+});
+
+router.post("/documents/file", async (req, res) => {
+  try {
+    const data = await ingestFileStream(req);
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(error.status || 502).json({ error: error.message });
   }
 });
 

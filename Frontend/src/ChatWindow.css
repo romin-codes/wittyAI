@@ -42,23 +42,116 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-.inputBox {
-  width: 100%;
-  position: relative;
-  max-width: 700px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 8px;
 }
 
-input {
+.docBar,
+.urlBar {
   width: 100%;
-  border: none;
+  max-width: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.docChips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.docChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #2e2e2e;
+  border: 1px solid #3f3f3f;
+  color: #e2e2e2;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.docChipName {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.docChipCount {
+  background-color: #424242;
+  color: #cfcfcf;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+}
+
+.docClearBtn {
+  background: transparent;
+  border: 1px solid #4a4a4a;
+  color: #b4b4b4;
+  font-size: 0.72rem;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.docClearBtn:hover {
+  color: #ffffff;
+  border-color: #7a7a7a;
+}
+
+.docStatus {
+  font-size: 0.75rem;
+  color: #9ecbff;
+}
+
+.urlInput {
+  flex: 1;
+  border: 1px solid #3d3d3d;
   background-color: rgba(255, 255, 255, 0.05);
-  padding: 20px;
+  color: #ececec;
+  padding: 10px 14px;
   font-size: 0.8rem;
+  border-radius: 10px;
+}
+
+.urlInput:focus {
+  outline: none;
+  border-color: #5c5c5c;
+}
+
+.urlSubmitBtn {
+  background-color: #339cff;
+  color: #ffffff;
+  border: none;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.urlSubmitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.inputBox {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 10px 14px;
   border-radius: 14px;
+  box-sizing: border-box;
   box-shadow:
     rgba(0, 0, 0, 0.05) 0 54px 55px,
     rgba(0, 0, 0, 0.05) 0 -12px 30px,
@@ -66,19 +159,58 @@ input {
     rgba(0, 0, 0, 0.05) 0 12px 3px,
     rgba(0, 0, 0, 0.05) 0 -3px 5px;
 }
-input:focus {
+
+.inputActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  margin: 0;
+  padding: 0;
+  color: #b4b4b4;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.iconBtn:hover,
+.iconBtn.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.promptInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 8px 4px;
+  font-size: 0.85rem;
+  color: #ececec;
+}
+.promptInput:focus {
   outline: none;
 }
 #submit {
   cursor: pointer;
-  height: 35px;
-  width: 35px;
-  font-size: 20px;
-  position: absolute;
-  right: 15px;
+  height: 34px;
+  width: 34px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 #submit i:hover {

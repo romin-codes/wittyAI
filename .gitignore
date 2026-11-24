@@ -3,3 +3,16 @@ node_modules/
 .env.*
 Backend/node_modules/
 Backend/.env
+!.env.example
+
+# Python (ai/)
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+# real user messages stay local; synthetic + labeled data is committed
+ai/router/data/raw/mongo_export.jsonl
+# trained binary model is reproducible via `python router.py`; plots are kept for the report
+ai/router/artifacts/model.joblib
+.ipynb_checkpoints/
+ai-service/chroma_db/

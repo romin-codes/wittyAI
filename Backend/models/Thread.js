@@ -1,5 +1,15 @@
 import mongoose from "mongoose";
 
+const SourceSchema = new mongoose.Schema(
+  {
+    source: { type: String, required: true },
+    page: { type: Number, default: null },
+    score: { type: Number, default: null },
+    snippet: { type: String, required: true },
+  },
+  { _id: false },
+);
+
 const MessageSchema = new mongoose.Schema({
   role: {
     type: String,
@@ -9,6 +19,10 @@ const MessageSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
+  },
+  sources: {
+    type: [SourceSchema],
+    default: [],
   },
   timestamp: {
     type: Date,
