@@ -16,7 +16,10 @@ from pypdf import PdfReader
 
 from schemas import DocumentSummary, DocumentsResponse, IngestResponse, SourceItem
 
-DEFAULT_PERSIST_DIR = str(Path(__file__).resolve().parent / "chroma_db")
+DEFAULT_PERSIST_DIR = os.getenv(
+    "CHROMA_PERSIST_DIR",
+    str(Path(__file__).resolve().parent / "chroma_db"),
+)
 COLLECTION_NAME = "witty_docs"
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
